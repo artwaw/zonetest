@@ -1,6 +1,6 @@
 ## ZONETEST(.py)
 
-Simple tool for testing if zone has been migrated successfully.
+Simple tool for testing if DNS zone has been migrated successfully.
 
 #Requirements:
 - Python 3.x (it may run on 2.x after some corrections, I don't intend to test it)

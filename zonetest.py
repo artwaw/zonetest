@@ -82,8 +82,6 @@ counter = 0;
 print("Setup complete. Processing "+total+" entries...")
 for line in zone_content:
 	counter = counter+1
-	if line.startswith('*') or line.startswith('@'):
-		continue
 	parts = line.split(delimeter)
 	print("Testing ("+str(counter)+"/"+total+") "+parts[3].strip()+" record "+parts[0].strip()+": ",end='')
 	print(parts[0].strip()+"."+domain,end=' ')

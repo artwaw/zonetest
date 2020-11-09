@@ -99,6 +99,7 @@ Arecords = []
 TXTrecords = []
 NSrecords = []
 CNAMErecords = []
+MXrecords = []
 for line in zone_content:
 	parts = line.split(delimeter)
 	if parts[3].strip() == 'A':
@@ -109,6 +110,8 @@ for line in zone_content:
 		NSrecords = processList(NSrecords,formQuery(parts[0].strip(),domain))
 	elif parts[3].strip() == 'CNAME':
 		CNAMErecords = processList(CNAMErecords,formQuery(parts[0].strip(),domain))
+	elif parts[3].strip() == 'MX':
+		MXrecords = processList(MXrecords,formQuery(parts[0].strip(),domain))
 RTypes = {'A':1, 'A6':38, 'AAAA':28, 'AFSDB':18, 'ANY':255, 'APL':42, 'AVC':258, 'AXFR':252, 'CAA':257, 'CDNSKEY':60, 'CDS':59, 'CERT':37, 'CNAME':5, 'CSYNC':62, 'DHCID':49, 'DLV':32769, 'DNAME':39, 'DNSKEY':48, 'DS':43,
 			'EUI48':108, 'EUI64':109, 'GPOS':27, 'HINFO':13, 'HIP':55, 'IPSECKEY':45, 'ISDN':20, 'IXFR':251, 'KEY':25, 'KX':36, 'LOC':29, 'MAILA':254, 'MAILB':253, 'MB':7, 'MD':3, 'MF':4, 'MG':8, 'MINFO':14, 'MR':9,
 			'MX':15, 'NAPTR':35, 'NONE':0, 'NS':2, 'NSAP':22, 'NSEC':47, 'NSEC3':50, 'NSEC3PARAM':51, 'NULL':10, 'NXT':30, 'OPT':41, 'PTR':12, 'PX':26, 'RP':17, 'RRSIG':46, 'RT':21, 'SIG':24, 'SOA':6, 'SPF':99, 'SRV':33,
@@ -122,5 +125,6 @@ print("Setup complete.\n")
 processSimpleRecord(Arecords,'A')
 processSimpleRecord(TXTrecords,'TXT')
 processSimpleRecord(CNAMErecords,'CNAME')
+processSimpleRecord(MXrecords,'MX')
 processSimpleRecord(NSrecords,'NS')
 print("Finished.\n")

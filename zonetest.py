@@ -130,6 +130,7 @@ Arecords = []
 TXTrecords = []
 NSrecords = []
 CNAMErecords = []
+SRVrecords = []
 MXrecords = []
 subdomains = []
 for line in zone_content:
@@ -142,6 +143,8 @@ for line in zone_content:
 		NSrecords = processList(NSrecords,formQuery(parts[0].strip(),domain))
 	elif parts[3].strip() == 'CNAME':
 		CNAMErecords = processList(CNAMErecords,formQuery(parts[0].strip(),domain))
+	elif parts[3].strip() == 'SRV':
+		SRVrecords = processList(SRVrecords,formQuery(parts[0].strip(),domain))
 	elif parts[3].strip() == 'MX':
 		MXrecords = processList(MXrecords,formQuery(parts[0].strip(),domain))
 RTypes = {'A':1, 'A6':38, 'AAAA':28, 'AFSDB':18, 'ANY':255, 'APL':42, 'AVC':258, 'AXFR':252, 'CAA':257, 'CDNSKEY':60, 'CDS':59, 'CERT':37, 'CNAME':5, 'CSYNC':62, 'DHCID':49, 'DLV':32769, 'DNAME':39, 'DNSKEY':48, 'DS':43,
@@ -160,5 +163,6 @@ processSimpleRecord(Arecords,'A')
 processSimpleRecord(TXTrecords,'TXT')
 processSimpleRecord(CNAMErecords,'CNAME')
 processSimpleRecord(MXrecords,'MX')
+processSimpleRecord(SRVrecords,'SRV')
 processSimpleRecord(NSrecords,'NS')
 print("Finished.\n")

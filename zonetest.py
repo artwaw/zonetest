@@ -5,29 +5,38 @@ import dns.resolver
 import dns.exception
 import ipaddress
 
-def isIP(param):
+def isIP(param) -> bool:
 	try:
 		test = ipaddress.ip_address(param)
 		return True
 	except:
 		return False
-	
-def formQuery(param1,param2):
+
+def formQuery(param1,param2) -> str:
 	if str(param1) == '@' or str(param1) == '*':
 		return param2
 	else:
 		return str(param1) + '.' + str(param2)
 
-def processList(alist:list,param:str):
+def processList(alist:list,param:str) -> list:
 	if param in alist:
 		return alist
 	alist.append(param)
 	return alist
 
-def processSimpleRecord(queries:list,recType:str):
+def processSimpleRecord(queries:list,recType:str) -> None:
 	fail = False
 	print("*** Processing "+str(len(queries))+" "+recType+" records... ***")
 	for rec in queries:
+		parts = rec.split('.')
+		if len(parts) > 2:
+			if rec.split('.')[-3] in subNS:
+				newDNS.nameservers = [ subNS[parts[-3]] ]
+				print('Using dns server '+subNS[parts[-3]]+' for subdomain '+parts[-3])
+			else:
+				newDNS.nameservers = [ targetNS ]
+		else:
+			newDNS.nameservers = [ targetNS ]
 		print(rec+"... ",end='')
 		try:
 			oldpart = oldDNS.resolve(rec,RTypes[recType]).response.answer[0]
@@ -52,10 +61,33 @@ def processSimpleRecord(queries:list,recType:str):
 			print("New record: ",newpart)
 	print("*** "+recType+" records done. ***\n")
 
+def detectSubdomains() -> None:
+	print('Looking for sudomains...')
+	with open(args.sub) as fhandle:
+		for line in fhandle:
+			 parts = line.split(':')
+			 if len(parts) != 2:
+			 	continue
+			 subNS[parts[0]] = parts[1].strip()
+	print(len(subNS),' subdomain name servers added: ',subNS.keys())
+	print('Translating name server URLs to IP address...',end=' ')
+	tempNS = dns.resolver.Resolver()
+	for key in subNS:
+		if not isIP(subNS.get(key)):
+			try:
+				print('Translating nameserver for subdomain '+key+': '+subNS.get(key)+' to: ',end='')
+				subNS[key] = str(tempNS.resolve(subNS.get(key)).response.answer[0][0]).strip()
+				print(subNS.get(key))
+			except dns.exception.DNSException as e:
+				print('Can\'t tranlate '+key+' to IP, reason: '+e.msg)
+				del subNS[key]
+	print('Done.')
+
 params = argparse.ArgumentParser(description='Tester for after zone migration between servers.\nTakes a list of entries in the zone from zone file, queries old server and compares the output with given name server.',)
 params.add_argument('zonefile', metavar='FileName', action='store', help='Zone file parsed for entries to be checked.')
 params.add_argument('ns_server', metavar='NameServer', action='store', help='Target name server IP or URL')
 params.add_argument('--coma', action='store_true', required=False, help='Use coma as delimeter. Otherwise TAB is used. Optional parameter')
+params.add_argument('--sub', action='store', required=False, help='Use subdomain nameservers list from file. File should be structured in lines, subdomain:nameserver entries one per line, no spaces.')
 args = params.parse_args()
 if (args.coma):
 	delimeter=','
@@ -100,6 +132,7 @@ TXTrecords = []
 NSrecords = []
 CNAMErecords = []
 MXrecords = []
+subdomains = []
 for line in zone_content:
 	parts = line.split(delimeter)
 	if parts[3].strip() == 'A':
@@ -116,10 +149,12 @@ RTypes = {'A':1, 'A6':38, 'AAAA':28, 'AFSDB':18, 'ANY':255, 'APL':42, 'AVC':258,
 			'EUI48':108, 'EUI64':109, 'GPOS':27, 'HINFO':13, 'HIP':55, 'IPSECKEY':45, 'ISDN':20, 'IXFR':251, 'KEY':25, 'KX':36, 'LOC':29, 'MAILA':254, 'MAILB':253, 'MB':7, 'MD':3, 'MF':4, 'MG':8, 'MINFO':14, 'MR':9,
 			'MX':15, 'NAPTR':35, 'NONE':0, 'NS':2, 'NSAP':22, 'NSEC':47, 'NSEC3':50, 'NSEC3PARAM':51, 'NULL':10, 'NXT':30, 'OPT':41, 'PTR':12, 'PX':26, 'RP':17, 'RRSIG':46, 'RT':21, 'SIG':24, 'SOA':6, 'SPF':99, 'SRV':33,
 			'SSHFP':44, 'TA':32768, 'TKEY':249, 'TLSA':52, 'TSIG':250, 'TXT':16, 'UNSPEC':103, 'URI':256, 'WKS':11, 'X25':19}
+if args.sub:
+	subNS = {}
+	detectSubdomains()
 # ALl vars known, setting up the dns resolvers
 oldDNS = dns.resolver.Resolver()
 newDNS = dns.resolver.Resolver()
-newDNS.nameservers = [ targetNS ]
 # Good to go. Processing...
 print("Setup complete.\n")
 processSimpleRecord(Arecords,'A')

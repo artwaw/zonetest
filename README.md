@@ -9,11 +9,15 @@ Simple tool for testing if DNS zone has been migrated successfully.
 - ipaddress python3 module (as above)
 
 #Parameters:
-./zonetest.py zonefile targetNS [--coma]
+./zonetest.py zonefile targetNS [--coma] [--sub filename]
 
 - zonefile - DNS zone as downloaded from the "old" server. Assumed Bind RFC compat.
 - targetNS - our "new" name server onto which the zone has been migrated. Can be IP or URL.
 - --coma - optional switch allowing to parse csv files (default format is TAB separated)
+- --sub filename - use additional nameservers to query for selected subdomains.
+					File can be any text file, content should be formatted one subdomain per file:
+					subdomain:nameserver
+					Nameserver can be IP or URL. 
 
 #Troubleshooting
 

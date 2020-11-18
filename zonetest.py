@@ -32,7 +32,6 @@ def processSimpleRecord(queries:list,recType:str) -> None:
 		if len(parts) > 2:
 			if rec.split('.')[-3] in subNS:
 				newDNS.nameservers = [ subNS[parts[-3]] ]
-				print('Using dns server '+subNS[parts[-3]]+' for subdomain '+parts[-3])
 			else:
 				newDNS.nameservers = [ targetNS ]
 		else:
